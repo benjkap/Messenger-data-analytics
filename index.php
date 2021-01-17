@@ -17,6 +17,7 @@ function base62_encode($data) {
     return $outstring;
 }
 
+//Debug functions (not work with all)
 function consoleLog($variable)
 {
     $variable = json_encode($variable);
@@ -116,14 +117,14 @@ foreach ($dirs as $dir) {
 
 }
 
-//nombre de conversations
+//nombre total de conversations
 $nbConvs = sizeof($messages) - $nbNull;
 
-//nombre de messages
+//nombre total de messages
 $nbMessages = 0;
 foreach ($messages as $message) if ($message !== null) $nbMessages += $message;
 
-//nombre de caractères
+//nombre total de caractères
 $nbChar = 0;
 foreach ($char as $c) if ($c !== null) $nbChar += $c;
 
