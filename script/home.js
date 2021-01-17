@@ -14,8 +14,6 @@ window.chartColors = {
 
 document.addEventListener("DOMContentLoaded", function(){
 
-    console.log('hello world');
-
     moment.locale('fr-FR');
     const ctx = document.getElementById('myChart').getContext('2d');
 

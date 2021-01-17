@@ -8,9 +8,11 @@ if (!isset($_GET['id']) || !isset($_GET['path'])) {
     exit();
 }
 
+//Debug functions (not work with all)
 function consoleLog($variable)
 {
     $variable = json_encode($variable);
+    $variable = str_replace("'", "\\'", $variable);
     $codeJavascript = "<script>console.log(JSON.parse('" . $variable . "'));</script>";
     echo($codeJavascript);
 }
@@ -18,6 +20,7 @@ function consoleLog($variable)
 function consoleTable($variable)
 {
     $variable = json_encode($variable);
+    $variable = str_replace("'", "\\'", $variable);
     $codeJavascript = "<script>console.table(JSON.parse('" . $variable . "'));</script>";
     echo($codeJavascript);
 }
@@ -25,26 +28,24 @@ function consoleTable($variable)
 $dir = './messages/'. $_GET['path'] .'/';
 $convs = scandir($dir);
 
+$dirName = $convs[intval($_GET['id'])];
+$path = $dir . $dirName . '/';
+$dirConv = scandir($path);
 
-
-$charlotteDirName = $convs[intval($_GET['id'])];
-$charlottePath = $dir . $charlotteDirName . '/';
-$charlotteDir = scandir($charlottePath);
-
-foreach ($charlotteDir as $file) {
+foreach ($dirConv as $file) {
     if (strpos($file, "message") === false) {
-        if (($key = array_search($file, $charlotteDir)) !== false) unset($charlotteDir[$key]);
-    } else if (($key = array_search($file, $charlotteDir)) !== false) $charlotteDir[$key] = $charlottePath . $charlotteDir[$key];
+        if (($key = array_search($file, $dirConv)) !== false) unset($dirConv[$key]);
+    } else if (($key = array_search($file, $dirConv)) !== false) $dirConv[$key] = $path . $dirConv[$key];
 }
-array_multisort(array_map('strlen', $charlotteDir), $charlotteDir);
+array_multisort(array_map('strlen', $dirConv), $dirConv);
 
-$title = json_decode(file_get_contents($charlotteDir[0]), true)['title'];
+$title = json_decode(file_get_contents($dirConv[0]), true)['title'];
 
 $participants = [];
-foreach ((array)json_decode(file_get_contents($charlotteDir[0]), true)['participants'] as $participant) array_push($participants, $participant['name']);
+foreach ((array)json_decode(file_get_contents($dirConv[0]), true)['participants'] as $participant) array_push($participants, $participant['name']);
 
 $messages = [];
-foreach ($charlotteDir as $file) foreach ((array)json_decode(file_get_contents($file), true)['messages'] as $message) array_push($messages, $message);
+foreach ($dirConv as $file) foreach ((array)json_decode(file_get_contents($file), true)['messages'] as $message) array_push($messages, $message);
 
 $firstMessage = $messages[sizeof($messages) - 1];
 $lastMessage = $messages[0];
