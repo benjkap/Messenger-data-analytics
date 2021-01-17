@@ -138,6 +138,9 @@ foreach ($formData as $label) if ($label !== null) array_push($data['labels'], u
 $data['messages'] = [];
 foreach ($messages as $m) if ($m !== null) array_push($data['messages'], $m);
 
+$data['chars'] = [];
+foreach ($char as $c) if ($c !== null) array_push($data['chars'], $c);
+
 
 ?>
 
@@ -187,6 +190,7 @@ foreach ($messages as $m) if ($m !== null) array_push($data['messages'], $m);
 
 <div id="labels" style="display: none;"><?php echo json_encode($data['labels']); ?></div>
 <div id="messages" style="display: none;"><?php echo json_encode($data['messages']); ?></div>
+<div id="caractères" style="display: none;"><?php echo json_encode($data['chars']); ?></div>
 
 <div class="mx-3 mt-3">
     <div class="row d-flex">
@@ -196,10 +200,6 @@ foreach ($messages as $m) if ($m !== null) array_push($data['messages'], $m);
                    href="#list-home" role="tab" aria-controls="home">Tableau de bord</a>
                 <a class="list-group-item list-group-item-action" id="list-profile-list" data-bs-toggle="list"
                    href="#list-conv" role="tab" aria-controls="profile">Conversations</a>
-                <a class="list-group-item list-group-item-action" id="list-messages-list" data-bs-toggle="list"
-                   href="#list-messages" role="tab" aria-controls="messages">Messages</a>
-                <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list"
-                   href="#list-settings" role="tab" aria-controls="settings">Settings</a>
             </div>
         </div>
         <div class="col-8 flex-fill">
@@ -223,6 +223,10 @@ foreach ($messages as $m) if ($m !== null) array_push($data['messages'], $m);
                         <div class="card-body">
                             Nombre de caractères: <span class="fw-bold"><?php echo number_format($nbChar,0, '', ' ') ?></span>
                         </div>
+                    </div>
+                    <div class="mx-auto d-flex justify-content-center mt-3">
+                        <button type="button" style="background-color: rgb(54, 162, 235); border-color: rgb(48,152,216)" class="btn btn-primary mx-3" id="messagesButton1" disabled>Messages</button>
+                        <button type="button" style="background-color: rgb(255, 159, 64); border-color: rgb(217,141,51)" class="btn btn-primary mx-3" id="charsButton1">Caractères</button>
                     </div>
                     <div class="chart-container w-100 mx-auto mt-3 scrollbar" style="height: 500px; overflow-y: scroll; position: relative;">
                         <canvas id="myChart" width="100" height="300"></canvas>
@@ -266,11 +270,6 @@ foreach ($messages as $m) if ($m !== null) array_push($data['messages'], $m);
                             <?php } ?>
                         </div>
                     </div>
-
-                </div>
-                <div class="tab-pane fade" id="list-messages" role="tabpanel" aria-labelledby="list-messages-list">...
-                </div>
-                <div class="tab-pane fade" id="list-settings" role="tabpanel" aria-labelledby="list-settings-list">...
                 </div>
             </div>
         </div>

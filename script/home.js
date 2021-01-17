@@ -10,24 +10,42 @@ window.chartColors = {
     grey: 'rgb(201, 203, 207)'
 };
 
-
-
 document.addEventListener("DOMContentLoaded", function(){
+
+    let messagesButton1 =document.getElementById('messagesButton1');
+    let charsButton1 =document.getElementById('charsButton1');
+
+    messagesButton1.addEventListener('click', function () {
+        chart.config.data = generateData('messages');
+        chart.config.options.title.text = 'Nombre de messages';
+        chart.update();
+        messagesButton1.disabled = true;
+        charsButton1.disabled = false;
+    });
+
+    charsButton1.addEventListener('click', function () {
+        chart.config.data = generateData('caractères');
+        chart.config.options.title.text = 'Nombre de caractères';
+        chart.update();
+        messagesButton1.disabled = false;
+        charsButton1.disabled = true;
+    });
+
 
     moment.locale('fr-FR');
     const ctx = document.getElementById('myChart').getContext('2d');
 
-    function generateData() {
+    function generateData(dataStr = 'messages') {
 
         let jsonData = [];
         jsonData['labels'] = JSON.parse(document.getElementById('labels').innerHTML);
-        jsonData['messages'] = JSON.parse(document.getElementById('messages').innerHTML);
+        jsonData['data'] = JSON.parse(document.getElementById(dataStr).innerHTML);
 
         let items = [];
-        for (let i = 0; i < jsonData['messages'].length; i++) {
+        for (let i = 0; i < jsonData['data'].length; i++) {
             items.push({
                 label: jsonData['labels'][i],
-                value: jsonData['messages'][i]
+                value: jsonData['data'][i]
             });
         }
 
@@ -45,9 +63,9 @@ document.addEventListener("DOMContentLoaded", function(){
         return {
             labels: labels,
             datasets: [{
-                label: 'Nombre de messages',
-                backgroundColor: window.chartColors.blue,
-                borderColor: window.chartColors.blue,
+                label: 'Nombre de ' + dataStr,
+                backgroundColor: (dataStr === 'messages')?window.chartColors.blue:window.chartColors.orange,
+                borderColor: (dataStr === 'messages')?window.chartColors.blue:window.chartColors.orange,
                 borderWidth: 1,
                 data: data
             }]
@@ -104,7 +122,7 @@ document.addEventListener("DOMContentLoaded", function(){
         }
     };
 
-    const chart = new Chart(ctx, cfg);
+    let chart = new Chart(ctx, cfg);
 
 });
 
