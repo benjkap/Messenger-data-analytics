@@ -72,6 +72,19 @@ foreach ($dirs as $dir) {
             $convName = json_decode(file_get_contents($dirPath . 'message_1.json'), true)['title'];
             if ($convName !== "") {
 
+                //verification nom pas présent et changement de nom si necéssaire
+                $tmp = false;
+                $tmpId = 0;
+                $originalConvName = $convName;
+                while (!$tmp) {
+                    $tmpId++;
+                    if (!array_search($convName, $formData)) $tmp = true;
+                    else $convName = $originalConvName . ' (' . $tmpId . ')';
+                }
+                unset($tmp);
+                unset($tmpId);
+                unset($originalConvName);
+
                 //push de nom, lettre et dossier
                 array_push($formData, $convName);
                 array_push($letters, strtoupper(substr($convName, 0, 1)));
