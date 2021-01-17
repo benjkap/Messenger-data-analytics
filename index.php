@@ -94,7 +94,7 @@ foreach ($dirs as $dir) {
 
                 //ajout du nombre de caractères
                 $tmp = 0;
-                foreach ($messageConv as $msg) if (isset($msg['content'])) $tmp += strlen(utf8_decode($msg['content']));
+                foreach ($messageConv as $msg) if ($msg['type'] === 'Generic' && isset($msg['content'])) $tmp += strlen(utf8_decode($msg['content']));
                 array_push($char, $tmp);
                 unset($tmp);
 
