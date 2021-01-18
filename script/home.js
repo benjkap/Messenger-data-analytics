@@ -12,8 +12,9 @@ window.chartColors = {
 
 document.addEventListener("DOMContentLoaded", function(){
 
-    let messagesButton1 =document.getElementById('messagesButton1');
-    let charsButton1 =document.getElementById('charsButton1');
+    let messagesButton1 = document.getElementById('messagesButton1');
+    let charsButton1 = document.getElementById('charsButton1');
+    let sortButton = document.getElementById('sortButton');
 
     messagesButton1.addEventListener('click', function () {
         chart.config.data = generateData('messages');
@@ -31,6 +32,41 @@ document.addEventListener("DOMContentLoaded", function(){
         charsButton1.disabled = true;
     });
 
+    let convsPages = document.getElementsByClassName('convs-pages');
+
+    function tri(htmlCollection, f){
+        function swap(node1, node2) {
+            const afterNode2 = node2.nextElementSibling;
+            const parent = node2.parentNode;
+            node1.replaceWith(node2);
+            parent.insertBefore(node1, afterNode2);
+        }
+        for(let i= 0 ; i< htmlCollection.length; i++){
+            for(let j=i+1; j< htmlCollection.length; j++){
+                if(f(htmlCollection[j], htmlCollection[i])) swap(htmlCollection[i], htmlCollection[j]);
+            }
+        }
+    }
+
+    for (let convs of convsPages) tri(convs.children,function(a,b) {
+        return parseInt(a.getAttribute('data_msg')) > parseInt(b.getAttribute('data_msg'));
+    });
+
+    sortButton.addEventListener('click', function () {
+        if (this.getAttribute('data') === 'messages'){
+            this.setAttribute('data', 'chars');
+            this.children.innerText.innerText = 'Par caractères';
+            for (let convs of convsPages) tri(convs.children,function(a,b) {
+                return parseInt(a.getAttribute('data_char')) > parseInt(b.getAttribute('data_char'));
+            });
+        } else if (this.getAttribute('data') === 'chars') {
+            this.setAttribute('data', 'messages');
+            this.children.innerText.innerText = 'Par messages';
+            for (let convs of convsPages) tri(convs.children,function(a,b) {
+                return parseInt(a.getAttribute('data_msg')) > parseInt(b.getAttribute('data_msg'));
+            });
+        }
+    });
 
     moment.locale('fr-FR');
     const ctx = document.getElementById('myChart').getContext('2d');
