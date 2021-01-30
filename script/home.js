@@ -15,22 +15,53 @@ document.addEventListener("DOMContentLoaded", function(){
     let messagesButton1 = document.getElementById('messagesButton1');
     let charsButton1 = document.getElementById('charsButton1');
     let sortButton = document.getElementById('sortButton');
+    let meSwitch = document.getElementById('meSwitch1');
+    let otherSwitch = document.getElementById('otherSwitch1');
 
     messagesButton1.addEventListener('click', function () {
-        chart.config.data = generateData('messages');
-        chart.config.options.title.text = 'Nombre de messages';
-        chart.update();
         messagesButton1.disabled = true;
         charsButton1.disabled = false;
+        chart.config.options.title.text = 'Nombre de messages';
+        dataSetFromSwitch();
     });
 
     charsButton1.addEventListener('click', function () {
-        chart.config.data = generateData('caractères');
-        chart.config.options.title.text = 'Nombre de caractères';
-        chart.update();
         messagesButton1.disabled = false;
         charsButton1.disabled = true;
+        chart.config.options.title.text = 'Nombre de caractères';
+        dataSetFromSwitch();
     });
+
+    meSwitch.addEventListener('change', dataSetFromSwitch);
+    otherSwitch.addEventListener('change', dataSetFromSwitch);
+
+    function dataSetFromSwitch() {
+
+        let value = {
+            me: meSwitch.checked,
+            other: otherSwitch.checked,
+            messages: (messagesButton1.disabled)?'messages':'caractères'
+        };
+
+        if (value.me && value.other) chart.config.data = generateData(value.messages, 'All');
+        if (value.me && !value.other) chart.config.data = generateData(value.messages, 'Me');
+        if (!value.me && value.other) chart.config.data = generateData(value.messages, 'Other');
+        if (!value.me && !value.other) chart.config.data = generateData(value.messages, 'No');
+        chart.update();
+
+        if (value.me && value.other) setGlobalStats(value.messages, 'All');
+        if (value.me && !value.other) setGlobalStats(value.messages, 'Me');
+        if (!value.me && value.other) setGlobalStats(value.messages, 'Other');
+        if (!value.me && !value.other) setGlobalStats(value.messages, 'No');
+
+        if (value.me && value.other) setConvsStats(value.messages, 'All');
+        if (value.me && !value.other) setConvsStats(value.messages, 'Me');
+        if (!value.me && value.other) setConvsStats(value.messages, 'Other');
+        if (!value.me && !value.other) setConvsStats(value.messages, 'No');
+        sortButton.dispatchEvent(new Event("click"));
+        sortButton.dispatchEvent(new Event("click"));
+
+    }
 
     let convsPages = document.getElementsByClassName('convs-pages');
 
@@ -47,10 +78,6 @@ document.addEventListener("DOMContentLoaded", function(){
             }
         }
     }
-
-    for (let convs of convsPages) tri(convs.children,function(a,b) {
-        return parseInt(a.getAttribute('data_msg')) > parseInt(b.getAttribute('data_msg'));
-    });
 
     sortButton.addEventListener('click', function () {
         if (this.getAttribute('data') === 'messages'){
@@ -71,11 +98,47 @@ document.addEventListener("DOMContentLoaded", function(){
     moment.locale('fr-FR');
     const ctx = document.getElementById('myChart').getContext('2d');
 
-    function generateData(dataStr = 'messages') {
+    function setGlobalStats(dataStr = 'messages', dataSet = 'All') {
 
         let jsonData = [];
         jsonData['labels'] = JSON.parse(document.getElementById('labels').innerHTML);
-        jsonData['data'] = JSON.parse(document.getElementById(dataStr).innerHTML);
+        jsonData['messages'] = (dataSet !== 'No')?JSON.parse(document.getElementById('messages' + dataSet).innerHTML):[];
+        jsonData['caracteres'] = (dataSet !== 'No')?JSON.parse(document.getElementById('caractères' + dataSet).innerHTML):[];
+
+        document.getElementById('nbConv').innerText = jsonData['labels'].length;
+
+        let nbMessages = 0;
+        for (let m of jsonData['messages']) nbMessages += m;
+        document.getElementById('nbMessages').innerText = nbMessages.toLocaleString();
+
+        let nbChar = 0;
+        for (let c of jsonData['caracteres']) nbChar += c;
+        document.getElementById('nbChar').innerText = nbChar.toLocaleString();
+
+    }
+
+    function setConvsStats(dataStr = 'messages', dataSet = 'All') {
+
+        let jsonData = [];
+        jsonData['messages'] = (dataSet !== 'No')?JSON.parse(document.getElementById('messages' + dataSet).innerHTML):[];
+        jsonData['caracteres'] = (dataSet !== 'No')?JSON.parse(document.getElementById('caractères' + dataSet).innerHTML):[];
+
+        for (let conversion of document.getElementsByClassName('conversation')) {
+            let key = conversion.getAttribute('data_id');
+            conversion.setAttribute('data_msg', (dataSet !== 'No')?jsonData['messages'][key]:0);
+            conversion.setAttribute('data_char', (dataSet !== 'No')?jsonData['caracteres'][key]:0);
+
+            conversion.getElementsByClassName('msg')[0].innerText = (dataSet !== 'No')?jsonData['messages'][key].toLocaleString():0;
+            conversion.getElementsByClassName('char')[0].innerText = (dataSet !== 'No')?jsonData['caracteres'][key].toLocaleString():0;
+        }
+
+    }
+
+    function generateData(dataStr = 'messages', dataSet = 'All') {
+
+        let jsonData = [];
+        jsonData['labels'] = JSON.parse(document.getElementById('labels').innerHTML);
+        jsonData['data'] = (dataSet !== 'No')?JSON.parse(document.getElementById(dataStr + dataSet).innerHTML):[];
 
         let items = [];
         for (let i = 0; i < jsonData['data'].length; i++) {
@@ -158,7 +221,16 @@ document.addEventListener("DOMContentLoaded", function(){
         }
     };
 
+    console.log('init');
+
+    setGlobalStats();
+    setConvsStats();
+
     let chart = new Chart(ctx, cfg);
+
+    for (let convs of convsPages) tri(convs.children,function(a,b) {
+        return parseInt(a.getAttribute('data_msg')) > parseInt(b.getAttribute('data_msg'));
+    });
 
 });
 

@@ -2,6 +2,7 @@
 
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
+ini_set('memory_limit', '1024M');
 
 if (!isset($_GET['id']) || !isset($_GET['path'])) {
     header('Location: ./');
@@ -9,20 +10,35 @@ if (!isset($_GET['id']) || !isset($_GET['path'])) {
 }
 
 //Debug functions (not work with all)
-function consoleLog($variable)
+$logCslPhp = [];
+function consoleLog()
 {
-    $variable = json_encode($variable);
-    $variable = str_replace("'", "\\'", $variable);
-    $codeJavascript = "<script>console.log(JSON.parse('" . $variable . "'));</script>";
-    echo($codeJavascript);
+    $variables = [];
+    global $logCslPhp;
+    foreach (func_get_args() as $arg) {
+        $escapers = array("\\", "/", "'", "\n", "\r", "\t", "\x08", "\x0c");
+        $replacements = array("\\\\", "\\/", "\\'", "\\n", "\\r", "\\t", "\\f", "\\b");
+        array_push($variables, "JSON.parse('" . str_replace($escapers, $replacements, json_encode(($arg))) . "'),");
+    }
+    $codeJavascript = "<script>console.log(";
+    foreach ($variables as $variable) $codeJavascript .= $variable;
+    $codeJavascript .= ");</script>";
+    array_push($logCslPhp, str_split($codeJavascript, 10000));
 }
 
-function consoleTable($variable)
+function consoleTable()
 {
-    $variable = json_encode($variable);
-    $variable = str_replace("'", "\\'", $variable);
-    $codeJavascript = "<script>console.table(JSON.parse('" . $variable . "'));</script>";
-    echo($codeJavascript);
+    $variables = [];
+    global $logCslPhp;
+    foreach (func_get_args() as $arg) {
+        $escapers = array("\\", "/", "'", "\n", "\r", "\t", "\x08", "\x0c");
+        $replacements = array("\\\\", "\\/", "\\'", "\\n", "\\r", "\\t", "\\f", "\\b");
+        array_push($variables, "JSON.parse('" . str_replace($escapers, $replacements, json_encode($arg)) . "'),");
+    }
+    $codeJavascript = "<script>console.table(";
+    foreach ($variables as $variable) $codeJavascript .= $variable;
+    $codeJavascript .= ");</script>";
+    array_push($logCslPhp, str_split($codeJavascript, 10000));
 }
 
 $dir = './messages/'. $_GET['path'] .'/';
@@ -124,10 +140,14 @@ foreach ($messages as $message) {
         </div>
     </div>
 </div>
-
-
 </body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
         crossorigin="anonymous"></script>
+<?php
+//en fin de page
+foreach ($logCslPhp as $log) {
+    foreach ($log as $logPart) echo $logPart;
+    echo "\n";
+} ?>
 </html>
